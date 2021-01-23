@@ -1,0 +1,70 @@
+pragma solidity ^0.4.20;
+contract Lottery {
+    address owner;
+    uint8 cost;
+    uint256 playdeadline;
+    uint256 revealdeadline;
+    address[] public players;
+    uint256 listofwinners;
+    address [] public winners;
+    event Won (address player);
+    bool public ended;
+    
+    
+    mapping(address => bytes32) played;
+    
+
+    function Lottery(uint8 cost_to_play, uint256 play_deadline, uint256 reveal_deadline) public{
+        owner = msg.sender;
+        cost  = cost_to_play;
+        playdeadline = play_deadline;
+        revealdeadline = reveal_deadline;
+    }
+    
+
+    uint256 public winning_number;
+    
+    function play (bytes32 h) external payable {
+        played[msg.sender] = h;
+        require(msg.value >= cost);
+        players.push(msg.sender);
+        
+    }
+    function winning (uint256 _winning_number) external {
+        require (msg.sender == owner);
+        winning_number = _winning_number;
+        address winner = players[winning_number];
+        winner.transfer(this.balance);
+        Won(winner);
+        
+    }
+    function reveal (uint256 r) external {
+        //require( now > revealdeadline);
+        bytes32 h = sha256(winning_number, r);
+        require (played[msg.sender] == h);
+        if (winners[listofwinners] == 0){
+            winners[listofwinners] = msg.sender;
+            listofwinners += 1;
+        }
+    }
+    
+
+    function test_bytes32 (bytes32 n) public pure returns (bytes32) {
+    return sha256 (n);
+}
+    function done () external {
+    uint x = 0;
+    while(true){
+        if(true){
+            winners[x].transfer(cost);
+            x += 1;
+            if(listofwinners == x){
+                break;
+            }
+            
+        }
+    }
+    
+    
+}
+}
